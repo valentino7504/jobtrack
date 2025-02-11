@@ -57,7 +57,7 @@ func AddJob(sqliteDB *sql.DB, job *Job) {
 func DeleteJobByID(sqliteDB *sql.DB, jobID int) {
 	const deleteQuery = `DELETE FROM jobs
 		WHERE id = ?
-		RETURNING company, position`
+		RETURNING company, position;`
 
 	var companyName, position string
 	err := sqliteDB.QueryRow(deleteQuery, jobID).Scan(&companyName, &position)
@@ -173,7 +173,7 @@ func UpdateJob(sqliteDB *sql.DB, jobID int, updates UpdatedJobParams) (*Job, err
 		applied_at = COALESCE(?, applied_at),
 		updated_at = (CURRENT_TIMESTAMP)
 		WHERE id = ?
-		RETURNING id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at`
+		RETURNING id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at;`
 
 	row := sqliteDB.QueryRow(
 		updateQuery,
