@@ -32,7 +32,7 @@ func InitDB(db *sql.DB) error {
 			location TEXT,
 			applied_at TEXT NOT NULL DEFAULT (DATE('now')),
 			salary_range TEXT,
-			job_posting_url TEXT
+			job_posting_url TEXT,
 			created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
 			updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 		);`
