@@ -7,16 +7,16 @@ import (
 )
 
 type Job struct {
-	Company       string     `json:"company" db:"company"`
-	Position      string     `json:"position" db:"position"`
-	Status        JobStatus  `json:"status" db:"status"`
-	Location      string     `json:"location" db:"location"`
-	SalaryRange   string     `json:"salary_range" db:"salary_range"`
-	JobPostingURL string     `json:"job_posting_url" db:"job_posting_url"`
-	AppliedAt     *time.Time `json:"applied_at" db:"applied_at"`
-	CreatedAt     *time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt     *time.Time `json:"updated_at" db:"updated_at"`
-	ID            int        `json:"id" db:"id"`
+	Company       string         `json:"company" db:"company"`
+	Position      string         `json:"position" db:"position"`
+	Status        JobStatus      `json:"status" db:"status"`
+	Location      sql.NullString `json:"location" db:"location"`
+	SalaryRange   sql.NullString `json:"salary_range" db:"salary_range"`
+	JobPostingURL sql.NullString `json:"job_posting_url" db:"job_posting_url"`
+	AppliedAt     *time.Time     `json:"applied_at" db:"applied_at"`
+	CreatedAt     *time.Time     `json:"created_at" db:"created_at"`
+	UpdatedAt     *time.Time     `json:"updated_at" db:"updated_at"`
+	ID            int            `json:"id" db:"id"`
 }
 
 func AddJob(sqliteDB *sql.DB, job *Job) {
@@ -35,10 +35,10 @@ func AddJob(sqliteDB *sql.DB, job *Job) {
 		job.Company,
 		job.Position,
 		job.Status,
-		job.Location,
+		ToSQLValue(&job.Location),
 		FormatDateTime(*job.AppliedAt, true),
-		job.SalaryRange,
-		job.JobPostingURL,
+		ToSQLValue(&job.SalaryRange),
+		ToSQLValue(&job.JobPostingURL),
 	)
 	if err != nil {
 		fmt.Println("Error in adding job", err)
@@ -73,7 +73,7 @@ func DeleteJobByID(sqliteDB *sql.DB, jobID int) {
 	fmt.Printf("Application for %s at %s (ID: %d) deleted\n", position, companyName, jobID)
 }
 
-func GetJobById(sqliteDB *sql.DB, id int) (*Job, error) {
+func GetJobByID(sqliteDB *sql.DB, id int) (*Job, error) {
 	const selectQuery = `SELECT
 		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at
 		FROM jobs WHERE id = ?;`
@@ -94,7 +94,6 @@ func GetJobById(sqliteDB *sql.DB, id int) (*Job, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Println("No job found with provided ID")
 			return nil, nil
 		}
 		return nil, err
@@ -131,10 +130,14 @@ func GetJobsByStatus(sqliteDB *sql.DB, jobStatus JobStatus) ([]*Job, error) {
 	return jobs, err
 }
 
-func GetJobsByDate(sqliteDB *sql.DB, dateStr string) ([]*Job, error) {
-	const selectQuery = `SELECT
+func GetJobsByDate(sqliteDB *sql.DB, dateStr string, before bool) ([]*Job, error) {
+	operator := ">"
+	if before {
+		operator = "<"
+	}
+	selectQuery := fmt.Sprintf(`SELECT
 		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at
-		FROM jobs WHERE applied_at > ?;`
+		FROM jobs WHERE applied_at %s ?;`, operator)
 	jobs, err := getJobs(sqliteDB, selectQuery, dateStr)
 	return jobs, err
 }
@@ -156,6 +159,11 @@ func ToSQLValue[T any](ptr *T) any {
 	switch v := any(*ptr).(type) {
 	case time.Time:
 		return FormatDateTime(v, true)
+	case string:
+		if v == "" {
+			return nil
+		}
+		return *ptr
 	default:
 		return *ptr
 	}
