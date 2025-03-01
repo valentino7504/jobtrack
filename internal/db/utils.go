@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	_ "modernc.org/sqlite"
 )
 
@@ -19,6 +21,21 @@ const (
 	REJECTED_OFFER JobStatus = "Rejected Offer"
 	REJECTED       JobStatus = "Rejected"
 )
+
+func IsValidStatus(status JobStatus) bool {
+	caser := cases.Title(language.English)
+	titleStatus := caser.String(string(status))
+	validStatuses := map[JobStatus]struct{}{
+		APPLIED:        {},
+		INTERVIEW:      {},
+		OFFER:          {},
+		ACCEPTED:       {},
+		REJECTED_OFFER: {},
+		REJECTED:       {},
+	}
+	_, ok := validStatuses[JobStatus(titleStatus)]
+	return ok
+}
 
 // Parses and returns a time.Time pointer from the format string
 func ParseDateTime(strTime string, dateOnly bool) (*time.Time, error) {
