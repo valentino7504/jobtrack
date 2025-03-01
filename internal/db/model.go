@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -125,20 +126,27 @@ func GetAllJobs(sqliteDB *sql.DB) ([]*Job, error) {
 func GetJobsByStatus(sqliteDB *sql.DB, jobStatus JobStatus) ([]*Job, error) {
 	const selectQuery = `SELECT
 		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at
-		FROM jobs WHERE status = ?;`
+		FROM jobs WHERE status = ? ORDER BY applied_at ASC;`
 	jobs, err := getJobs(sqliteDB, selectQuery, jobStatus)
 	return jobs, err
 }
 
-func GetJobsByDate(sqliteDB *sql.DB, dateStr string, before bool) ([]*Job, error) {
-	operator := ">"
-	if before {
-		operator = "<"
+func GetJobsByDate(sqliteDB *sql.DB, before string, after string) ([]*Job, error) {
+	beforeTime, err := ParseDateTime(before, true)
+	if err != nil {
+		return nil, errors.New("The date passed to --before is not formatted properly")
 	}
-	selectQuery := fmt.Sprintf(`SELECT
+	afterTime, err := ParseDateTime(after, true)
+	if err != nil {
+		return nil, errors.New("The date passed to --after is not formatted properly")
+	}
+	if afterTime.After(*beforeTime) {
+		return nil, errors.New("The date range specified is invalid")
+	}
+	selectQuery := `SELECT
 		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at
-		FROM jobs WHERE applied_at %s ?;`, operator)
-	jobs, err := getJobs(sqliteDB, selectQuery, dateStr)
+		FROM jobs WHERE applied_at >= ? AND applied_at <= ?;`
+	jobs, err := getJobs(sqliteDB, selectQuery, afterTime, beforeTime)
 	return jobs, err
 }
 
