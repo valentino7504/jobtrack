@@ -32,7 +32,7 @@ func initializeJob(cmd *cobra.Command) *db.Job {
 	applied, _ := cmd.Flags().GetString("applied")
 	appliedAt, err := db.ParseDateTime(applied, true)
 	if err != nil {
-		fmt.Println("Applied date is not in the right format")
+		fmt.Println(err)
 		return nil
 	}
 	if appliedAt.After(time.Now()) {
@@ -66,18 +66,19 @@ func initializeJob(cmd *cobra.Command) *db.Job {
 	return &job
 }
 
-// createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create job applications in the database with optional details.",
-	Long: `Creates a new job. The mandatory flags are --company and --position
-	Other flags include:
-	- --status - To define the status of the application: Applied, Interview, Offer,
-	Accepted, Rejected Offer, Rejected
-	- --location - To define the location of the company where the job is
-	- --applied - Specify the date of application in YYYY-MM-DD format
-	- --salary-range - Specify the salary
-	- --job-posting-url - The URL to the job posting`,
+	Short: "Create a new job application entry with optional details.",
+	Long: `Add a new job application to the database.
+
+You must provide the company name and position. Additional details such as status, location, salary range,
+job posting URL, and application date can also be included.
+
+Examples:
+  jobtrack create --company "Google" --position "Backend Engineer"
+  jobtrack create --company "Amazon" --position "SDE" --status "Applied"
+  jobtrack create --company "Meta" --position "Data Scientist" --salary-range "$120,000 - $150,000"
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		job := initializeJob(cmd)
 		if job == nil {
