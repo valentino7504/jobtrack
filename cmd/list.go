@@ -6,18 +6,25 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/valentino7504/jobtrack/internal/db"
-	"github.com/valentino7504/jobtrack/internal/printer"
+	"github.com/valentino7504/jobtrack/internal/jobPrinter"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List job applications with optional filters",
-	Long: `Lists all job applications stored in the database by default.
-	You can filter results using the following flags:
-	- "--id <job_id>" -> Fetches a job by ID (e.g. jobtrack list --id 3
-	- "--status <job_status>" -> Fetches jobs by status`,
+	Short: "List job applications with optional filters and sorting.",
+	Long: `Retrieve job applications from the database.
+
+By default, this command lists all jobs. You can filter results by ID, status, or applied date,
+and sort them by latest or oldest.
+
+Examples:
+  jobtrack list                           # List all job applications
+  jobtrack list --status "Interview"      # List jobs with status "Interview"
+  jobtrack list --latest                  # List jobs sorted by most recent first
+  jobtrack list --after "2024-01-01"      # List jobs applied on or after Jan 1, 2024
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jobID, _ := cmd.Flags().GetInt("id")
 		status, _ := cmd.Flags().GetString("status")
@@ -39,7 +46,7 @@ var listCmd = &cobra.Command{
 				fmt.Println("No job found with ID:", jobID)
 				return
 			}
-			printer.PrintJob(job)
+			jobPrinter.PrintJob(job)
 		case status != "":
 			jobs, err := db.GetJobsByStatus(SqliteDB, db.JobStatus(status))
 			if err != nil {
@@ -50,7 +57,7 @@ var listCmd = &cobra.Command{
 				fmt.Println("No jobs found with that status")
 				return
 			}
-			printer.PrintJobsTable(jobs)
+			jobPrinter.PrintJobsTable(jobs)
 		case after != defaultAfter || before != defaultBefore:
 			jobs, err := db.GetJobsByDate(SqliteDB, before, after)
 			if err != nil {
@@ -61,7 +68,7 @@ var listCmd = &cobra.Command{
 				fmt.Println("No jobs found within the specified date range")
 				return
 			}
-			printer.PrintJobsTable(jobs)
+			jobPrinter.PrintJobsTable(jobs)
 		default:
 			jobs, err := db.GetAllJobs(SqliteDB)
 			if err != nil {
@@ -72,7 +79,7 @@ var listCmd = &cobra.Command{
 				fmt.Println("No job applications available")
 				return
 			}
-			printer.PrintJobsTable(jobs)
+			jobPrinter.PrintJobsTable(jobs)
 		}
 	},
 }
