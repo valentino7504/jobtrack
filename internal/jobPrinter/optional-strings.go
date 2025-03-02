@@ -1,4 +1,4 @@
-package printer
+package jobPrinter
 
 import (
 	"database/sql"
