@@ -50,7 +50,7 @@ func ParseDateTime(strTime string, dateOnly bool) (*time.Time, error) {
 	}
 	t, err := time.Parse(format, strTime)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Time passed is not in the correct format")
 	}
 	return &t, nil
 }

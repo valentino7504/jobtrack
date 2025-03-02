@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 )
@@ -134,14 +133,14 @@ func GetJobsByStatus(sqliteDB *sql.DB, jobStatus JobStatus) ([]*Job, error) {
 func GetJobsByDate(sqliteDB *sql.DB, before string, after string) ([]*Job, error) {
 	beforeTime, err := ParseDateTime(before, true)
 	if err != nil {
-		return nil, errors.New("The date passed to --before is not formatted properly")
+		return nil, err
 	}
 	afterTime, err := ParseDateTime(after, true)
 	if err != nil {
-		return nil, errors.New("The date passed to --after is not formatted properly")
+		return nil, err
 	}
 	if afterTime.After(*beforeTime) {
-		return nil, errors.New("The date range specified is invalid")
+		return nil, err
 	}
 	selectQuery := `SELECT
 		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at
@@ -205,7 +204,7 @@ func UpdateJob(sqliteDB *sql.DB, jobID int, updates UpdatedJobParams) (*Job, err
 	job, err := ParseRow(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Println("No row found with that ID")
+			fmt.Println("No job found with that id")
 			return nil, nil
 		}
 		return nil, err
