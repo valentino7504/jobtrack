@@ -37,6 +37,11 @@ Examples:
 			fmt.Println("No job found with ID:", id)
 			return
 		}
+		force, _ := cmd.Flags().GetBool("force")
+		if force {
+			db.DeleteJobByID(SqliteDB, id)
+			return
+		}
 		fmt.Println("Job to be deleted:")
 		jobPrinter.PrintJob(job)
 		reader := bufio.NewReader(os.Stdin)
@@ -52,5 +57,6 @@ Examples:
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
+	deleteCmd.Flags().Bool("force", false, "Skip confirmation prompt")
 	deleteCmd.Flags().Int("id", -1, "Specify the ID of the job you want to delete")
 }
