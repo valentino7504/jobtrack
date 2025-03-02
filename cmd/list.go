@@ -30,8 +30,6 @@ Examples:
 		status, _ := cmd.Flags().GetString("status")
 		after, _ := cmd.Flags().GetString("after")
 		before, _ := cmd.Flags().GetString("before")
-		defaultBefore := "1970-01-01"
-		defaultAfter := db.FormatDateTime(time.Now(), true)
 		caser := cases.Title(language.English)
 		status = caser.String(status)
 
@@ -58,7 +56,7 @@ Examples:
 				return
 			}
 			jobPrinter.PrintJobsTable(jobs)
-		case after != defaultAfter || before != defaultBefore:
+		case cmd.Flags().Changed("after") || cmd.Flags().Changed("before"):
 			jobs, err := db.GetJobsByDate(SqliteDB, before, after)
 			if err != nil {
 				fmt.Println(err)
