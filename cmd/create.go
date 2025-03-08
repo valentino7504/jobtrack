@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -11,8 +10,8 @@ import (
 	"golang.org/x/text/language"
 )
 
-func optionalSQL(param string) sql.NullString {
-	var paramSQL sql.NullString
+func optionalSQL(param string) db.NullString {
+	var paramSQL db.NullString
 	if param != "" {
 		paramSQL.String = param
 		paramSQL.Valid = true
