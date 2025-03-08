@@ -7,16 +7,16 @@ import (
 )
 
 type Job struct {
-	Company       string         `json:"company" db:"company"`
-	Position      string         `json:"position" db:"position"`
-	Status        JobStatus      `json:"status" db:"status"`
-	Location      sql.NullString `json:"location" db:"location"`
-	SalaryRange   sql.NullString `json:"salary_range" db:"salary_range"`
-	JobPostingURL sql.NullString `json:"job_posting_url" db:"job_posting_url"`
-	AppliedAt     *time.Time     `json:"applied_at" db:"applied_at"`
-	CreatedAt     *time.Time     `json:"created_at" db:"created_at"`
-	UpdatedAt     *time.Time     `json:"updated_at" db:"updated_at"`
-	ID            int            `json:"id" db:"id"`
+	Company       string     `json:"company" db:"company"`
+	Position      string     `json:"position" db:"position"`
+	Status        JobStatus  `json:"status" db:"status"`
+	Location      NullString `json:"location" db:"location"`
+	SalaryRange   NullString `json:"salary_range" db:"salary_range"`
+	JobPostingURL NullString `json:"job_posting_url" db:"job_posting_url"`
+	AppliedAt     *time.Time `json:"applied_at" db:"applied_at"`
+	CreatedAt     *time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     *time.Time `json:"updated_at" db:"updated_at"`
+	ID            int        `json:"id" db:"id"`
 }
 
 func AddJob(sqliteDB *sql.DB, job *Job) {
