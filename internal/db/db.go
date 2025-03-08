@@ -4,11 +4,23 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	_ "modernc.org/sqlite"
 )
+
+type NullString struct {
+	sql.NullString
+}
+
+func (x *NullString) MarshalJSON() ([]byte, error) {
+	if !x.Valid {
+		return []byte("null"), nil
+	}
+	return json.Marshal(x.String)
+}
 
 // GetConnection returns a pointer to the sqlite database handle.
 func GetConnection() (*sql.DB, error) {
