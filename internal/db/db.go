@@ -15,6 +15,8 @@ type NullString struct {
 	sql.NullString
 }
 
+// NullString implements MarshalJSON to ensure that the potentially null strings are marshalled
+// properly.
 func (x *NullString) MarshalJSON() ([]byte, error) {
 	if !x.Valid {
 		return []byte("null"), nil
