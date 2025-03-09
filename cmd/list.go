@@ -68,7 +68,7 @@ Examples:
 			}
 			jobPrinter.PrintJobsTable(jobs)
 		default:
-			jobs, err := db.GetAllJobs(SqliteDB)
+			jobs, err := db.GetAllJobs(SqliteDB, false)
 			if err != nil {
 				fmt.Println("Error getting jobs", err)
 				return
