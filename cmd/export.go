@@ -46,17 +46,19 @@ Examples:
 				fmt.Println("Error creating export file:", err)
 				return
 			}
+			defer f.Close()
 		}
 		switch exportFormat {
 		case "csv":
 			// use db.Jobs to use the ToCSV method on it
 			w := csv.NewWriter(f)
+			defer w.Flush()
 			err = w.WriteAll(db.Jobs(jobs).ToCSV())
 			if err != nil {
 				fmt.Println("Error writing to CSV file:", err)
 				return
 			}
-		default:
+		case "json":
 			b, err := json.Marshal(jobs)
 			if err != nil {
 				fmt.Println("Error marshalling to JSON:", err)
@@ -66,12 +68,20 @@ Examples:
 			err = json.Indent(&out, b, "", "\t")
 			if err != nil {
 				fmt.Println("Error marshalling to JSON:", err)
+				return
 			}
+			out.WriteString("\n")
 			_, err = out.WriteTo(f)
 			if err != nil {
 				fmt.Println("Error writing JSON to file:", err)
 				return
 			}
+		default:
+			fmt.Println("Invalid format. Leave blank or use 'json' or 'csv'.")
+			return
+		}
+		if filename != "" {
+			fmt.Println("Export successful:", filename)
 		}
 	},
 }
