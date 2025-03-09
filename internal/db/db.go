@@ -17,11 +17,25 @@ type NullString struct {
 
 // NullString implements MarshalJSON to ensure that the potentially null strings are marshalled
 // properly.
-func (x *NullString) MarshalJSON() ([]byte, error) {
-	if !x.Valid {
+func (ns *NullString) MarshalJSON() ([]byte, error) {
+	if !ns.Valid {
 		return []byte("null"), nil
 	}
-	return json.Marshal(x.String)
+	return json.Marshal(ns.String)
+}
+
+// Unmarshalling a NullString
+func (ns *NullString) UnmarshalJSON(data []byte) error {
+	ns.Valid = string(data) != "null"
+	e := json.Unmarshal(data, &ns.String)
+	return e
+}
+
+func nullToEmpty(ns NullString) string {
+	if ns.Valid {
+		return ns.String
+	}
+	return ""
 }
 
 // GetConnection returns a pointer to the sqlite database handle.
