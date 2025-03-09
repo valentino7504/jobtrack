@@ -19,6 +19,41 @@ type Job struct {
 	ID            int        `json:"id" db:"id"`
 }
 
+type Jobs []*Job
+
+// Marshals a job into CSV format
+func (j *Job) ToCSV() []string {
+	return []string{
+		j.Company,
+		j.Position,
+		string(j.Status),
+		nullToEmpty(j.Location),
+		nullToEmpty(j.SalaryRange),
+		nullToEmpty(j.JobPostingURL),
+		FormatDateTime(*j.AppliedAt, true),
+		FormatDateTime(*j.CreatedAt, false),
+		FormatDateTime(*j.UpdatedAt, false),
+	}
+}
+
+func (jobs Jobs) ToCSV() [][]string {
+	rows := [][]string{{
+		"Company",
+		"Position",
+		"Status",
+		"Location",
+		"SalaryRange",
+		"JobPostingURL",
+		"AppliedAt",
+		"CreatedAt",
+		"UpdatedAt",
+	}}
+	for _, job := range jobs {
+		rows = append(rows, job.ToCSV())
+	}
+	return rows
+}
+
 func AddJob(sqliteDB *sql.DB, job *Job) {
 	const createQuery = `INSERT INTO jobs
 		(company, position, status, location, applied_at, salary_range, job_posting_url)
@@ -35,10 +70,10 @@ func AddJob(sqliteDB *sql.DB, job *Job) {
 		job.Company,
 		job.Position,
 		job.Status,
-		ToSQLValue(&job.Location),
+		toSQLValue(&job.Location),
 		FormatDateTime(*job.AppliedAt, true),
-		ToSQLValue(&job.SalaryRange),
-		ToSQLValue(&job.JobPostingURL),
+		toSQLValue(&job.SalaryRange),
+		toSQLValue(&job.JobPostingURL),
 	)
 	if err != nil {
 		fmt.Println("Error in adding job", err)
@@ -114,10 +149,13 @@ func getJobs(sqliteDB *sql.DB, query string, params ...any) ([]*Job, error) {
 	return jobs, err
 }
 
-func GetAllJobs(sqliteDB *sql.DB) ([]*Job, error) {
-	const selectQuery = `SELECT
-		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at
-		FROM jobs;`
+func GetAllJobs(sqliteDB *sql.DB, includeTimestamps bool) ([]*Job, error) {
+	selectQuery := `SELECT
+		id, company, position, status, location, salary_range, job_posting_url, applied_at`
+	if includeTimestamps {
+		selectQuery += `, created_at, updated_at`
+	}
+	selectQuery += ` FROM jobs;`
 	jobs, err := getJobs(sqliteDB, selectQuery)
 	return jobs, err
 }
@@ -159,7 +197,7 @@ type UpdatedJobParams struct {
 	AppliedAt     *time.Time
 }
 
-func ToSQLValue[T any](ptr *T) any {
+func toSQLValue[T any](ptr *T) any {
 	if ptr == nil {
 		return nil
 	}
@@ -192,13 +230,13 @@ func UpdateJob(sqliteDB *sql.DB, jobID int, updates UpdatedJobParams) (*Job, err
 
 	row := sqliteDB.QueryRow(
 		updateQuery,
-		ToSQLValue(updates.Company),
-		ToSQLValue(updates.Position),
-		ToSQLValue(updates.Status),
-		ToSQLValue(updates.Location),
-		ToSQLValue(updates.SalaryRange),
-		ToSQLValue(updates.JobPostingURL),
-		ToSQLValue(updates.AppliedAt),
+		toSQLValue(updates.Company),
+		toSQLValue(updates.Position),
+		toSQLValue(updates.Status),
+		toSQLValue(updates.Location),
+		toSQLValue(updates.SalaryRange),
+		toSQLValue(updates.JobPostingURL),
+		toSQLValue(updates.AppliedAt),
 		jobID,
 	)
 	job, err := ParseRow(row)
