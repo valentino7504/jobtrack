@@ -4,39 +4,11 @@ package db
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 
 	_ "modernc.org/sqlite"
 )
-
-type NullString struct {
-	sql.NullString
-}
-
-// NullString implements MarshalJSON to ensure that the potentially null strings are marshalled
-// properly.
-func (ns *NullString) MarshalJSON() ([]byte, error) {
-	if !ns.Valid {
-		return []byte("null"), nil
-	}
-	return json.Marshal(ns.String)
-}
-
-// Unmarshalling a NullString
-func (ns *NullString) UnmarshalJSON(data []byte) error {
-	ns.Valid = string(data) != "null"
-	e := json.Unmarshal(data, &ns.String)
-	return e
-}
-
-func nullToEmpty(ns NullString) string {
-	if ns.Valid {
-		return ns.String
-	}
-	return ""
-}
 
 // GetConnection returns a pointer to the sqlite database handle.
 func GetConnection() (*sql.DB, error) {

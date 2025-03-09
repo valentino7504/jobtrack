@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -9,6 +10,11 @@ import (
 	"golang.org/x/text/language"
 	_ "modernc.org/sqlite"
 )
+
+// NullString type
+type NullString struct {
+	sql.NullString
+}
 
 // JobStatus type
 type JobStatus string
@@ -121,4 +127,27 @@ func FetchJobsFromRows(rows *sql.Rows) ([]*Job, error) {
 		return jobs, err
 	}
 	return jobs, nil
+}
+
+// NullString implements MarshalJSON to ensure that the potentially null strings are marshalled
+// properly.
+func (ns *NullString) MarshalJSON() ([]byte, error) {
+	if !ns.Valid {
+		return []byte("null"), nil
+	}
+	return json.Marshal(ns.String)
+}
+
+// Unmarshalling a NullString
+func (ns *NullString) UnmarshalJSON(data []byte) error {
+	ns.Valid = string(data) != "null"
+	e := json.Unmarshal(data, &ns.String)
+	return e
+}
+
+func nullToEmpty(ns NullString) string {
+	if ns.Valid {
+		return ns.String
+	}
+	return ""
 }
