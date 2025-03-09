@@ -151,10 +151,7 @@ func getJobs(sqliteDB *sql.DB, query string, params ...any) ([]*Job, error) {
 
 func GetAllJobs(sqliteDB *sql.DB, includeTimestamps bool) ([]*Job, error) {
 	selectQuery := `SELECT
-		id, company, position, status, location, salary_range, job_posting_url, applied_at`
-	if includeTimestamps {
-		selectQuery += `, created_at, updated_at`
-	}
+		id, company, position, status, location, salary_range, job_posting_url, applied_at, created_at, updated_at`
 	selectQuery += ` FROM jobs;`
 	jobs, err := getJobs(sqliteDB, selectQuery)
 	return jobs, err
