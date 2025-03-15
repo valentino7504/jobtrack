@@ -34,6 +34,7 @@ Only .json and .csv files are supported.`,
 		}
 		fp := args[0]
 		ext := filepath.Ext(fp)
+		success, failed := 0, 0
 		switch ext {
 		case ".json":
 			data, err := os.ReadFile(fp)
@@ -46,24 +47,39 @@ Only .json and .csv files are supported.`,
 				log.Fatal("Error unmarshalling JSON:", err)
 			}
 			for _, job := range jobs {
-				db.AddJob(SqliteDB, job)
+				err := db.AddJob(SqliteDB, job)
+				if err != nil {
+					failed++
+				} else {
+					success++
+				}
 			}
 		case ".csv":
 			f, err := os.Open(fp)
-			defer f.Close()
 			if err != nil {
 				fmt.Println("Error opening file:", err)
+				return
 			}
+			defer f.Close()
 			r := csv.NewReader(f)
-			jobs := db.FromCSV(r)
+			jobs, err := db.FromCSV(r)
+			if err != nil {
+				fmt.Println("Error reading CSV file")
+				return
+			}
 			for _, job := range jobs {
 				db.AddJob(SqliteDB, job)
+				if err != nil {
+					failed++
+				} else {
+					success++
+				}
 			}
 		default:
 			fmt.Println("File format", ext, "not supported. Use json or csv")
 			return
 		}
-		fmt.Println("Import from", fp, "successful")
+		fmt.Println("Import from", fp, "complete:", success, "jobs added,", failed, "failed.")
 	},
 }
 

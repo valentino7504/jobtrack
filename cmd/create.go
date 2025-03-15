@@ -83,7 +83,10 @@ Examples:
 		if job == nil {
 			return
 		}
-		db.AddJob(SqliteDB, job)
+		err := db.AddJob(SqliteDB, job)
+		if err != nil {
+			return
+		}
 	},
 }
 

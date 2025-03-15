@@ -75,7 +75,7 @@ func fromCSV(row []string) *Job {
 	return &job
 }
 
-func FromCSV(r *csv.Reader) Jobs {
+func FromCSV(r *csv.Reader) (Jobs, error) {
 	var jobs Jobs
 	for {
 		row, err := r.Read()
@@ -83,14 +83,14 @@ func FromCSV(r *csv.Reader) Jobs {
 			break
 		}
 		if err != nil {
-			log.Fatal("Error parsing CSV file:", err)
+			return jobs, err
 		}
 		jobs = append(jobs, fromCSV(row))
 	}
-	return jobs
+	return jobs, nil
 }
 
-func AddJob(sqliteDB *sql.DB, job *Job) {
+func AddJob(sqliteDB *sql.DB, job *Job) error {
 	const createQuery = `INSERT INTO jobs
 		(company, position, status, location, applied_at, salary_range, job_posting_url)
 		VALUES
@@ -113,16 +113,17 @@ func AddJob(sqliteDB *sql.DB, job *Job) {
 	)
 	if err != nil {
 		fmt.Println("Error in adding job", err)
-		return
+		return err
 	}
 
 	jobDBId, err := result.LastInsertId()
 	if err != nil {
 		fmt.Println("Error getting new job ID", err)
-		return
+		return err
 	}
 	job.ID = int(jobDBId)
 	fmt.Printf("New job application (ID: %d) added, good luck!\n", jobDBId)
+	return nil
 }
 
 func DeleteJobByID(sqliteDB *sql.DB, jobID int) {
