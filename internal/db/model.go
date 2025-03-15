@@ -2,7 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"fmt"
+	"io"
+	"log"
 	"time"
 )
 
@@ -52,6 +55,39 @@ func (jobs Jobs) ToCSV() [][]string {
 		rows = append(rows, job.ToCSV())
 	}
 	return rows
+}
+
+func fromCSV(row []string) *Job {
+	appliedAt, _ := ParseDateTime(row[6], true)
+	createdAt, _ := ParseDateTime(row[7], false)
+	updatedAt, _ := ParseDateTime(row[8], false)
+	job := Job{
+		Company:       row[0],
+		Position:      row[1],
+		Status:        JobStatus(row[2]),
+		Location:      emptyToNull(row[3]),
+		SalaryRange:   emptyToNull(row[4]),
+		JobPostingURL: emptyToNull(row[5]),
+		AppliedAt:     appliedAt,
+		CreatedAt:     createdAt,
+		UpdatedAt:     updatedAt,
+	}
+	return &job
+}
+
+func FromCSV(r *csv.Reader) Jobs {
+	var jobs Jobs
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal("Error parsing CSV file:", err)
+		}
+		jobs = append(jobs, fromCSV(row))
+	}
+	return jobs
 }
 
 func AddJob(sqliteDB *sql.DB, job *Job) {

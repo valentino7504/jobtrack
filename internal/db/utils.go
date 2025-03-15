@@ -145,9 +145,23 @@ func (ns *NullString) UnmarshalJSON(data []byte) error {
 	return e
 }
 
+// Marshalling a NullString into CSV value
 func nullToEmpty(ns NullString) string {
 	if ns.Valid {
 		return ns.String
 	}
 	return ""
+}
+
+// Unmarshalling a NullString from a CSV value
+func emptyToNull(s string) NullString {
+	var ns NullString
+	if len(s) == 0 {
+		ns.Valid = false
+		ns.String = ""
+		return ns
+	}
+	ns.Valid = true
+	ns.String = s
+	return ns
 }
