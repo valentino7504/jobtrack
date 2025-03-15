@@ -6,17 +6,30 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 
 	_ "modernc.org/sqlite"
 )
 
 // GetConnection returns a pointer to the sqlite database handle.
 func GetConnection() (*sql.DB, error) {
-	path := "./test.db"
+	var dir, path string
+	if runtime.GOOS == "windows" {
+		appData := os.Getenv("APPDATA")
+		dir = filepath.Join(appData, "jobtrack")
+	} else {
+		home, _ := os.UserHomeDir()
+		dir = filepath.Join(home, ".local", "share", "jobtrack")
+	}
+	path = filepath.Join(dir, "jobs.db")
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		return nil, fmt.Errorf("Failed to create database directory: %w", err)
+	}
 	sqliteDB, err := sql.Open("sqlite", path)
 	if err != nil {
-		fmt.Println("Couldn't connect to db:", err)
-		return nil, err
+		return nil, fmt.Errorf("Couldn't connect to database: %w", err)
 	}
 	return sqliteDB, nil
 }
@@ -37,16 +50,13 @@ func InitDB(db *sql.DB) error {
 			updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 		);`
 	if db == nil {
-		fmt.Println("Nil DB pointer")
 		return errors.New("The pointer passed to InitDB is nil")
 	}
 	if err := db.Ping(); err != nil {
-		fmt.Println("No connection to the db:", err)
-		return err
+		return fmt.Errorf("No connection to the db: %w", err)
 	}
 	if _, err := db.Exec(schemaQuery); err != nil {
-		fmt.Println("Error creating database:", err)
-		return err
+		return fmt.Errorf("Error creating database: %w", err)
 	}
 	return nil
 }
