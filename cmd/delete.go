@@ -45,7 +45,7 @@ Examples:
 		fmt.Println("Job to be deleted:")
 		jobPrinter.PrintJob(job)
 		reader := bufio.NewReader(os.Stdin)
-		fmt.Printf("\nAre you sure? (Y/n): ")
+		fmt.Printf("\nAre you sure? ([Y]/n): ")
 		response, _ := reader.ReadString('\n')
 		response = strings.TrimSpace(response)
 		if strings.ToLower(response) == "n" {
