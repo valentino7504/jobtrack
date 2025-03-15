@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -48,6 +49,16 @@ Only .json and .csv files are supported.`,
 				db.AddJob(SqliteDB, job)
 			}
 		case ".csv":
+			f, err := os.Open(fp)
+			defer f.Close()
+			if err != nil {
+				fmt.Println("Error opening file:", err)
+			}
+			r := csv.NewReader(f)
+			jobs := db.FromCSV(r)
+			for _, job := range jobs {
+				db.AddJob(SqliteDB, job)
+			}
 		default:
 			fmt.Println("File format", ext, "not supported. Use json or csv")
 			return
