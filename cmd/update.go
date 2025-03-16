@@ -23,11 +23,11 @@ func initializeUpdate(cmd *cobra.Command) *db.UpdatedJobParams {
 	jobPostingURL, _ := cmd.Flags().GetString("job-posting-url")
 	applied, _ := cmd.Flags().GetString("applied")
 	appliedAt, err := db.ParseDateTime(applied, true)
-	if err != nil {
+	if err != nil && applied != "" {
 		fmt.Println(err)
 		return nil
 	}
-	if !db.IsValidStatus(db.JobStatus(status)) {
+	if !db.IsValidStatus(db.JobStatus(status)) && status != "" {
 		fmt.Println("Specified status is not valid")
 		fmt.Println(
 			"Valid statuses are: Applied, Interview, Offer, Accepted, \"Rejected Offer\" and Rejected",
