@@ -4,6 +4,9 @@ PLATFORMS_LINUX = "linux amd64" "linux arm64" "linux arm"
 PLATFORMS_MAC = "darwin amd64" "darwin arm64"
 PLATFORMS_WINDOWS = "windows amd64" "windows arm64"
 
+.PHONY: all
+all: install
+
 .PHONY: release
 release: build-linux build-mac build-windows
 
@@ -54,6 +57,8 @@ build-linux:
 		OUTPUT_DIR="$(APP_NAME)-$$GOOS-$$GOARCH"; \
 		mkdir "$$OUTPUT_DIR"; \
 		cp README.md "$$OUTPUT_DIR"; \
+		cp -r man "$$OUTPUT_DIR"; \
+		cp -r completions "$$OUTPUT_DIR"; \
 		GOOS=$$1 GOARCH=$$2 go build -o "$$OUTPUT_DIR/$(APP_NAME)" .; \
 		zip -r "$$OUTPUT_DIR.zip" "$$OUTPUT_DIR"; \
 		rm -rf "$$OUTPUT_DIR"; \
@@ -69,6 +74,8 @@ build-mac:
 		OUTPUT_DIR="$(APP_NAME)-$$GOOS-$$GOARCH"; \
 		mkdir "$$OUTPUT_DIR"; \
 		cp README.md "$$OUTPUT_DIR"; \
+		cp -r man "$$OUTPUT_DIR"; \
+		cp -r completions "$$OUTPUT_DIR"; \
 		GOOS=$$1 GOARCH=$$2 go build -o "$$OUTPUT_DIR/$(APP_NAME)" .; \
 		zip -r "$$OUTPUT_DIR.zip" "$$OUTPUT_DIR"; \
 		rm -rf "$$OUTPUT_DIR"; \
