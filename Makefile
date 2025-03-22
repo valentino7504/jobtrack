@@ -38,7 +38,7 @@ install: build
 uninstall:
 	@echo "Uninstalling $(APP_NAME)...";
 	@sudo rm -rf /usr/local/bin/$(APP_NAME);
-	@rm -rf "$HOME/.local/share/jobtrack";
+	@rm -rf "$$HOME/.local/share/jobtrack";
 	@sudo rm -rf "/usr/share/man/man1/jobtrack.1";
 	@sudo rm -rf "/usr/share/man/man1/jobtrack-create.1";
 	@sudo rm -rf "/usr/share/man/man1/jobtrack-list.1";
