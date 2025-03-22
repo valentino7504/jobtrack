@@ -1,4 +1,2 @@
-*.bash linguist-detectable=false
-*.zsh linguist-detectable=false
-*.fish linguist-detectable=false
-Makefile linguist-detectable=false
+completions/* linguist-vendored
+Makefile linguist-vendored
