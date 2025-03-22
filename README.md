@@ -42,7 +42,7 @@ If you do not want to build from source, download a prebuilt release.
 
 #### Steps: <span id="manual"></span>
 
-1. Go to the Releases page.
+1. Go to the [Releases](https://github.com/valentino7504/jobtrack/releases) page.
 2. Download the .zip file for your OS and architecture.
 3. Extract and move the executable to a directory in your PATH:
 
