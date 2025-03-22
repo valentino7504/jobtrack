@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	// "github.com/spf13/cobra/doc"
 )
 
 // A pointer to the SqliteDB handler
@@ -25,8 +26,18 @@ func Execute() {
 }
 
 func init() {
+	// header := &doc.GenManHeader{
+	// 	Title:   "JobTrack",
+	// 	Section: "1",
+	// }
+	// cobra.CheckErr(doc.GenManTree(rootCmd, header, "./man"))
+	// file, err := os.Create("./man/jobtrack-update.1")
+	// cobra.CheckErr(err)
+	// defer file.Close()
+	// cobra.CheckErr(doc.GenMan(updateCmd, header, file))
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.CompletionOptions.HiddenDefaultCmd = true
+	// rootCmd.CompletionOptions.HiddenDefaultCmd = true
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
 func SetDB(dbHandle *sql.DB) {
