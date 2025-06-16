@@ -69,7 +69,7 @@ sudo mv completions/jobtrack.bash /etc/bash_completion.d/
 
 ```sh
 sudo mkdir /usr/local/share/zsh/site-functions/_jobtrack
-sudo mv completions/jobtrack.zsh /usr/local/share/zsh/site-functions/_jobtrack
+sudo mv completions/_jobtrack /usr/local/share/zsh/site-functions/_jobtrack
 ```
 
 - Fish
