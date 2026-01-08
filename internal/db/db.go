@@ -25,11 +25,11 @@ func GetConnection() (*sql.DB, error) {
 	}
 	path = filepath.Join(dir, "jobs.db")
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		return nil, fmt.Errorf("Failed to create database directory: %w", err)
+		return nil, fmt.Errorf("failed to create database directory: %w", err)
 	}
 	sqliteDB, err := sql.Open("sqlite", path)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't connect to database: %w", err)
+		return nil, fmt.Errorf("couldn't connect to database: %w", err)
 	}
 	return sqliteDB, nil
 }
